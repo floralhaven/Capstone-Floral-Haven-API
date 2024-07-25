@@ -4,10 +4,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const helmet = require('helmet');  // Add this line
 const connectToDB = require('./db');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 const saltRounds = 10;
 
@@ -47,10 +48,23 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, '..')));
 
+// Use helmet for security
+app.use(helmet());
+
+// Configure CSP using helmet
+app.use(helmet.contentSecurityPolicy({
+    directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: ["'self'", "http://localhost:3000"], // Allow connections to your local server
+        // Add other directives as needed
+    }
+}));
+
 // Handle sign-up POST request
-app.post('http://localhost:3000/signup', async (req, res) => {
+app.post('/signup', async (req, res) => {
     try {
         const { email, username, password } = req.body;
+
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         const newUser = new User({
@@ -67,7 +81,7 @@ app.post('http://localhost:3000/signup', async (req, res) => {
 });
 
 // Handle login POST request
-app.post('http://localhost:3000/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
@@ -91,12 +105,12 @@ app.post('http://localhost:3000/login', async (req, res) => {
 });
 
 // Handle logout
-app.post('http://localhost:3000/logout', (req, res) => {
+app.post('/logout', (req, res) => {
     res.json({ message: 'Logout successful' });
 });
 
 // Handle saving a layout
-app.post('http://localhost:3000/user/layout', async (req, res) => {
+app.post('/user/layout', async (req, res) => {
     const { layoutName, layout, username } = req.body;
 
     try {
@@ -123,7 +137,7 @@ app.post('http://localhost:3000/user/layout', async (req, res) => {
 });
 
 // Handle fetching layouts for a user
-app.get('http://localhost:3000/user/:username/layouts', async (req, res) => {
+app.get('/user/:username/layouts', async (req, res) => {
     const { username } = req.params;
 
     try {
@@ -140,8 +154,7 @@ app.get('http://localhost:3000/user/:username/layouts', async (req, res) => {
     }
 });
 
-// Handle adding/removing favorites
-app.post('http://localhost:3000/user/:username/favorites', async (req, res) => {
+app.post('/user/:username/favorites', async (req, res) => {
     const { username } = req.params;
     const { plantId, favorited, commonName, scientificName, image, collection } = req.body;
 
@@ -171,22 +184,21 @@ app.post('http://localhost:3000/user/:username/favorites', async (req, res) => {
     }
 });
 
-// Get favorites for a user
-app.get('http://localhost:3000/user/:username/favorites', async (req, res) => {
+app.get('/user/:username/favorites', async (req, res) => {
     try {
         const username = req.params.username;
         const user = await User.findOne({ username }).select('favorites').lean();
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.json(user.favorites);
+        res.json(user);
     } catch (error) {
         res.status(500).json({ error: 'An error occurred' });
     }
 });
 
 // DELETE Favorite
-app.delete('http://localhost:3000/user/:username/favorites/:plantId', async (req, res) => {
+app.delete('/user/:username/favorites/:plantId', async (req, res) => {
     const { username, plantId } = req.params;
 
     try {
@@ -207,7 +219,7 @@ app.delete('http://localhost:3000/user/:username/favorites/:plantId', async (req
 });
 
 // Endpoint to get data from a specific collection
-app.get('http://localhost:3000/data/:collectionName', async (req, res) => {
+app.get('/data/:collectionName', async (req, res) => {
     const { collectionName } = req.params;
     const { commonName } = req.query;
 
@@ -228,7 +240,7 @@ app.get('http://localhost:3000/data/:collectionName', async (req, res) => {
 });
 
 // Handle password change
-app.post('http://localhost:3000/change-password', async (req, res) => {
+app.post('/change-password', async (req, res) => {
     const { oldpassword, newpassword, userId } = req.body;
 
     try {
