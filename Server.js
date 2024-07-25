@@ -48,7 +48,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, '..')));
 
 // Handle sign-up POST request
-app.post('/signup', async (req, res) => {
+app.post('http://localhost:3000/signup', async (req, res) => {
     try {
         const { email, username, password } = req.body;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -67,7 +67,7 @@ app.post('/signup', async (req, res) => {
 });
 
 // Handle login POST request
-app.post('/login', async (req, res) => {
+app.post('http://localhost:3000/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
@@ -91,12 +91,12 @@ app.post('/login', async (req, res) => {
 });
 
 // Handle logout
-app.post('/logout', (req, res) => {
+app.post('http://localhost:3000/logout', (req, res) => {
     res.json({ message: 'Logout successful' });
 });
 
 // Handle saving a layout
-app.post('/user/layout', async (req, res) => {
+app.post('http://localhost:3000/user/layout', async (req, res) => {
     const { layoutName, layout, username } = req.body;
 
     try {
@@ -123,7 +123,7 @@ app.post('/user/layout', async (req, res) => {
 });
 
 // Handle fetching layouts for a user
-app.get('/user/:username/layouts', async (req, res) => {
+app.get('http://localhost:3000/user/:username/layouts', async (req, res) => {
     const { username } = req.params;
 
     try {
@@ -141,7 +141,7 @@ app.get('/user/:username/layouts', async (req, res) => {
 });
 
 // Handle adding/removing favorites
-app.post('/user/:username/favorites', async (req, res) => {
+app.post('http://localhost:3000/user/:username/favorites', async (req, res) => {
     const { username } = req.params;
     const { plantId, favorited, commonName, scientificName, image, collection } = req.body;
 
@@ -172,7 +172,7 @@ app.post('/user/:username/favorites', async (req, res) => {
 });
 
 // Get favorites for a user
-app.get('/user/:username/favorites', async (req, res) => {
+app.get('http://localhost:3000/user/:username/favorites', async (req, res) => {
     try {
         const username = req.params.username;
         const user = await User.findOne({ username }).select('favorites').lean();
@@ -186,7 +186,7 @@ app.get('/user/:username/favorites', async (req, res) => {
 });
 
 // DELETE Favorite
-app.delete('/user/:username/favorites/:plantId', async (req, res) => {
+app.delete('http://localhost:3000/user/:username/favorites/:plantId', async (req, res) => {
     const { username, plantId } = req.params;
 
     try {
@@ -207,7 +207,7 @@ app.delete('/user/:username/favorites/:plantId', async (req, res) => {
 });
 
 // Endpoint to get data from a specific collection
-app.get('/data/:collectionName', async (req, res) => {
+app.get('http://localhost:3000/data/:collectionName', async (req, res) => {
     const { collectionName } = req.params;
     const { commonName } = req.query;
 
@@ -228,7 +228,7 @@ app.get('/data/:collectionName', async (req, res) => {
 });
 
 // Handle password change
-app.post('/change-password', async (req, res) => {
+app.post('http://localhost:3000/change-password', async (req, res) => {
     const { oldpassword, newpassword, userId } = req.body;
 
     try {
