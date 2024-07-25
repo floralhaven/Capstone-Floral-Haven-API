@@ -52,11 +52,26 @@ app.use(express.static(path.join(__dirname, '..')));
 app.use(helmet());
 
 // Configure CSP using helmet
-app.use(helmet.contentSecurityPolicy({
-    directives: {
-        defaultSrc: ["'self'"],
-        connectSrc: ["'self'", "http://localhost:3000"], // Allow connections to your local server
-        // Add other directives as needed
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            connectSrc: ["'self'", "http://localhost:3000"],
+            // Add other directives as needed
+        }
+    },
+    permissionsPolicy: {
+        features: {
+            fullscreen: ['*'],
+            geolocation: ['self'],
+            microphone: ['self'],
+            camera: ['self'],
+            // Explicitly disable origin trial features
+            interestCohort: ['none'],
+            runAdAuction: ['none'],
+            joinAdInterestGroup: ['none'],
+            browsingTopics: ['none']
+        }
     }
 }));
 
