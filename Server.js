@@ -7,11 +7,10 @@ const mongoose = require('mongoose');
 const connectToDB = require('./db');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const saltRounds = 10;
 
-// Connect to MongoDB
 connectToDB();
 
 // Define User and Layout Schemas
@@ -52,7 +51,6 @@ app.use(express.static(path.join(__dirname, '..')));
 app.post('/signup', async (req, res) => {
     try {
         const { email, username, password } = req.body;
-
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         const newUser = new User({
@@ -142,6 +140,7 @@ app.get('/user/:username/layouts', async (req, res) => {
     }
 });
 
+// Handle adding/removing favorites
 app.post('/user/:username/favorites', async (req, res) => {
     const { username } = req.params;
     const { plantId, favorited, commonName, scientificName, image, collection } = req.body;
@@ -172,6 +171,7 @@ app.post('/user/:username/favorites', async (req, res) => {
     }
 });
 
+// Get favorites for a user
 app.get('/user/:username/favorites', async (req, res) => {
     try {
         const username = req.params.username;
@@ -179,7 +179,7 @@ app.get('/user/:username/favorites', async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.json(user);
+        res.json(user.favorites);
     } catch (error) {
         res.status(500).json({ error: 'An error occurred' });
     }

@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 
-const mongoUri = 'mongodb+srv://Admin:IMXshfqLgjgzNZwN@originalcluster.g2m81ys.mongodb.net/Capstone?retryWrites=true&w=majority';
+dotenv.config();
+
+const mongoUri = process.env.MONGO_URI || 'mongodb+srv://Admin:IMXshfqLgjgzNZwN@originalcluster.g2m81ys.mongodb.net/Capstone?retryWrites=true&w=majority';
 
 const connectToDB = async () => {
     try {
