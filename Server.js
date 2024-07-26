@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
-const helmet = require('helmet');  // Add this line
 const connectToDB = require('./db');
 
 const app = express();
@@ -47,33 +46,6 @@ const Layout = mongoose.model('Layout', layoutSchema);
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, '..')));
-
-// Use helmet for security
-app.use(helmet());
-
-// Configure CSP using helmet
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            connectSrc: ["'self'", "http://localhost:3000"],
-            // Add other directives as needed
-        }
-    },
-    permissionsPolicy: {
-        features: {
-            fullscreen: ['*'],
-            geolocation: ['self'],
-            microphone: ['self'],
-            camera: ['self'],
-            // Explicitly disable origin trial features
-            interestCohort: ['none'],
-            runAdAuction: ['none'],
-            joinAdInterestGroup: ['none'],
-            browsingTopics: ['none']
-        }
-    }
-}));
 
 // Handle sign-up POST request
 app.post('/signup', async (req, res) => {
@@ -256,10 +228,10 @@ app.get('/data/:collectionName', async (req, res) => {
 
 // Handle password change
 app.post('/change-password', async (req, res) => {
-    const { oldpassword, newpassword, userId } = req.body;
+    const { oldpassword, newpassword, username } = req.body;
 
     try {
-        const user = await User.findById(userId);
+        const user = await User.findOne({ username });
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
