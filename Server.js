@@ -226,6 +226,17 @@ app.get('/data/:collectionName', async (req, res) => {
     }
 });
 
+// Handle fetching all layouts
+app.get('/layouts', async (req, res) => {
+    try {
+        const layouts = await Layout.find();
+        res.json(layouts);
+    } catch (error) {
+        console.error('Error fetching layouts:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Handle password change
 app.post('/change-password', async (req, res) => {
     const { oldpassword, newpassword, username } = req.body;
