@@ -40,8 +40,17 @@ const layoutSchema = new mongoose.Schema({
     grid: { type: Array, required: true }
 });
 
+const commentSchema = new mongoose.Schema({
+    layoutOwner: { type: String, required: true },
+    layoutName: { type: String, required: true },
+    username: { type: String, required: true }, // User who made the comment
+    commentText: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+});
+
 const User = mongoose.model('User', userSchema);
 const Layout = mongoose.model('Layout', layoutSchema);
+const Comments = mongoose.model('Comments', commentSchema);
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -234,6 +243,42 @@ app.get('/layouts', async (req, res) => {
     } catch (error) {
         console.error('Error fetching layouts:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+//Comments
+app.post('/comments', async (req, res) => {
+    const { layoutOwner, layoutName, username, commentText } = req.body;
+
+    if (!layoutOwner || !layoutName || !username || !commentText) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    try {
+        const newComment = new Comments({
+            layoutOwner,
+            layoutName,
+            username,
+            commentText
+        });
+
+        await newComment.save();
+        res.status(201).json(newComment);
+    } catch (error) {
+        console.error('Error saving comment:', error);
+        res.status(500).json({ message: 'Error saving comment' });
+    }
+});
+
+app.get('/comments', async (req, res) => {
+    const { layoutOwner, layoutName } = req.query;
+
+    try {
+        const comments = await Comments.find({ layoutOwner, layoutName });
+        res.status(200).json(comments);
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ message: 'Error fetching comments' });
     }
 });
 
