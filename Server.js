@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-app.use(cors({ origin: 'https://floralhaven.github.io' }));
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const connectToDB = require('./db');
