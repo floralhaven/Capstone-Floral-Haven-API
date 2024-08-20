@@ -1,5 +1,6 @@
 const express = require('express');
 const https = require('https');
+const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -9,10 +10,16 @@ const connectToDB = require('./db');
 
 const app = express();
 const PORT = 3000;
+const HTTPS_PORT = 3443; 
 
 const saltRounds = 10;
 
 connectToDB();
+
+const sslOptions = {
+    key: fs.readFileSync('/etc/ssl/private/selfsigned.key'),
+    cert: fs.readFileSync('/etc/ssl/certs/selfsigned.crt')
+};
 
 // Define User and Layout Schemas
 const userSchema = new mongoose.Schema({
@@ -311,7 +318,23 @@ app.post('/change-password', async (req, res) => {
     }
 });
 
-// Start the server
+// Redirect HTTP to HTTPS
+app.use((req, res, next) => {
+    if (req.secure) {
+        // Request was via https, so do no special handling
+        next();
+    } else {
+        // Redirect to https
+        res.redirect(`https://${req.headers.host}${req.url}`);
+    }
+});
+
+// Start the HTTP server
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`HTTP server running on http://localhost:${PORT}`);
+});
+
+// Start the HTTPS server
+https.createServer(sslOptions, app).listen(HTTPS_PORT, () => {
+    console.log(`HTTPS server running on https://localhost:${HTTPS_PORT}`);
 });
